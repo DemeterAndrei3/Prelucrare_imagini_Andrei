@@ -90,5 +90,102 @@ root.title("Procesare Imagini - Laborator")
 
 btn = tk.Button(root, text="Încarcă imagine", command=open_image, width=30, height=2)
 btn.pack(pady=20)
+#--------------------------------
+#Lab_3
+#----------------------------------
 
+# ---------------------------------------------------------
+# 1. Conversie RGB → YUV și YCbCr
+# ---------------------------------------------------------
+
+def convert_to_YUV(image):
+    # OpenCV folosește BGR, deci convertim întâi în RGB
+    rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    yuv = cv2.cvtColor(rgb, cv2.COLOR_RGB2YUV)
+    return yuv
+
+def convert_to_YCbCr(image):
+    rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    ycbcr = cv2.cvtColor(rgb, cv2.COLOR_RGB2YCrCb)  # OpenCV folosește YCrCb
+    return ycbcr
+
+# ---------------------------------------------------------
+# 2. Imagine inversă + afișarea canalelor
+# ---------------------------------------------------------
+
+def inverse_image(image):
+    inverted = 255 - image
+    return inverted
+
+def show_channels(image, title_prefix="Channel"):
+    b, g, r = cv2.split(image)
+    plt.figure(figsize=(12,4))
+    plt.subplot(1,3,1); plt.imshow(b, cmap='gray'); plt.title(f"{title_prefix} - B")
+    plt.subplot(1,3,2); plt.imshow(g, cmap='gray'); plt.title(f"{title_prefix} - G")
+    plt.subplot(1,3,3); plt.imshow(r, cmap='gray'); plt.title(f"{title_prefix} - R")
+    plt.show()
+
+# ---------------------------------------------------------
+# 3. Binarizare imagine
+# ---------------------------------------------------------
+
+def binarize(image, threshold=128):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, binary = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
+    return binary
+
+# ---------------------------------------------------------
+# 4. Calcul centru de masă
+# ---------------------------------------------------------
+
+def center_of_mass(binary_image):
+    # Convertim în imagine binară 0/1
+    img = binary_image // 255
+
+    # Coordonate
+    h, w = img.shape
+    y_indices, x_indices = np.indices((h, w))
+
+    # Formula centrului de masă
+    total = img.sum()
+    if total == 0:
+        return None
+
+    x_center = (x_indices * img).sum() / total
+    y_center = (y_indices * img).sum() / total
+
+    return (x_center, y_center)
+
+# ---------------------------------------------------------
+# Program principal
+# ---------------------------------------------------------
+
+image = cv2.imread("imagine.jpg")  # pune numele imaginii tale
+
+# 1. Conversii
+yuv = convert_to_YUV(image)
+ycbcr = convert_to_YCbCr(image)
+
+plt.figure(figsize=(10,4))
+plt.subplot(1,2,1); plt.imshow(yuv); plt.title("YUV")
+plt.subplot(1,2,2); plt.imshow(ycbcr); plt.title("YCbCr")
+plt.show()
+
+# 2. Imagine inversă + canale
+inv = inverse_image(image)
+show_channels(inv, "Inverted")
+
+# 3. Binarizare
+binary = binarize(image, threshold=120)
+plt.imshow(binary, cmap='gray'); plt.title("Imagine binarizată"); plt.show()
+
+# 4. Centru de masă
+center = center_of_mass(binary)
+print("Centrul de masă:", center)
+
+# Afișare centru pe imagine
+if center:
+    img_copy = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
+    cv2.circle(img_copy, (int(center[0]), int(center[1])), 5, (0,0,255), -1)
+    plt.imshow(img_copy); plt.title("Centru de masă"); plt.show(
 root.mainloop()
