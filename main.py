@@ -187,5 +187,7 @@ print("Centrul de masă:", center)
 if center:
     img_copy = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
     cv2.circle(img_copy, (int(center[0]), int(center[1])), 5, (0,0,255), -1)
-    plt.imshow(img_copy); plt.title("Centru de masă"); plt.show(
+    plt.imshow(img_copy); plt.title("Centru de masă"); plt.show;
+    binar_otsu = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    
 root.mainloop()
